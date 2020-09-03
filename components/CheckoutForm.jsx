@@ -7,6 +7,8 @@ import BillingDetailsFields from "./prebuilt/BillingDetailsFields";
 import SubmitButton from "./prebuilt/SubmitButton";
 import CheckoutError from "./prebuilt/CheckoutError";
 
+import { CardElement } from '@stripe/react-stripe-js'
+
 const CardElementContainer = styled.div`
   height: 40px;
   display: flex;
@@ -37,13 +39,35 @@ const CheckoutForm = ({ price, onSuccessfulCheckout }) => {
     };
   };
 
+  // stripe.com/docs/js
+  const cardElementOptions = {
+    // a way to inject styles into the iframe
+    style: {
+      base: {
+        fontSize: '16px',
+        color: '#ffffff',
+        "::placeholder": {
+          color: '#87bbfc',
+        }
+      },
+      invalid: {
+        color: '#ffc7ee',
+        iconColor: '#ffc7ee',
+      },
+    },
+    hidePostalCode: true,
+  }
+
   return (
     <form onSubmit={handleFormSubmit}>
       <Row>
         <BillingDetailsFields />
       </Row>
       <Row>
-        <CardElementContainer></CardElementContainer>
+        <CardElementContainer>
+          <CardElement options={cardElementOptions} />
+        
+        </CardElementContainer>
       </Row>
       {checkoutError && <CheckoutError>{checkoutError}</CheckoutError>}
       <Row>
