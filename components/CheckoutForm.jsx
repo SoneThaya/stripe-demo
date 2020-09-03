@@ -7,7 +7,7 @@ import BillingDetailsFields from "./prebuilt/BillingDetailsFields";
 import SubmitButton from "./prebuilt/SubmitButton";
 import CheckoutError from "./prebuilt/CheckoutError";
 
-import { CardElement } from '@stripe/react-stripe-js'
+import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js'
 
 const CardElementContainer = styled.div`
   height: 40px;
@@ -24,6 +24,9 @@ const CheckoutForm = ({ price, onSuccessfulCheckout }) => {
   const [isProcessing, setProcessingTo] = useState(false);
   const [checkoutError, setCheckoutError] = useState();
 
+  const elements = useElements();
+  const stripe = useStripe();
+
   const handleFormSubmit = async ev => {
     ev.preventDefault();
 
@@ -37,6 +40,38 @@ const CheckoutForm = ({ price, onSuccessfulCheckout }) => {
         postal_code: ev.target.zip.value
       }
     };
+
+    setProcessingTo(true);
+
+    const { data: clientSecret } = await axios.post('/api/payment_intents', {
+      // TIP in stripe, amount is in the lowest denomination
+      amount: price * 100
+    });
+
+    const cardElement = elements.getElement(CardElement);
+
+    const paymentMethodReq = await stripe.createPaymentMethod({
+      type: 'card',
+      card: cardElement,
+      billing_details: billingDetails
+    });
+
+    
+    // create a payment intent on the server
+    // client_secret of that payment intent
+
+    // need a reference to the cardElement
+    // need stripe js
+    // create a payment method
+
+    // confirm the card payment
+    // payment method id
+    // client_secret
+    const confirmedCardPayment = await stripe.confirmCardPayment(clientSecret, {
+      payment_method: paymentMethodReq.paymentMethod.id,
+    })
+
+    onSuccessfulCheckout();
   };
 
   // stripe.com/docs/js
